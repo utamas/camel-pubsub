@@ -1,0 +1,5 @@
+.idea
+target
+
+terraform/.state
+terraform/.terraform
