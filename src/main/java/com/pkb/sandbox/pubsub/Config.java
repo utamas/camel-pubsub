@@ -1,5 +1,6 @@
 package com.pkb.sandbox.pubsub;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -19,6 +20,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class Config {
     private static final Logger LOG = getLogger(lookup().lookupClass());
 
+    @Bean
+    public ObjectMapper json() {
+        return new ObjectMapper();
+    }
+
     static final String TEST_CONSUMER = "direct:testconsumer";
     private static final String TEST_PRODUCER = "direct:testproducer";
 
@@ -28,14 +34,13 @@ public class Config {
     private ProducerTemplate producer;
 
     @Bean
-    public Consumer consumer() {
-        return new Consumer();
+    public PubSubEventConsumer consumer(ObjectMapper json) {
+        return new PubSubEventConsumer(json);
     }
 
     @Bean
-    public Producer producer() {
-        LOG.info("What is this kerek? {}", producer);
-        return new Producer(producer);
+    public PubSubEventProducer producer(ObjectMapper json) {
+        return new PubSubEventProducer(producer, json);
     }
 
     @Bean
@@ -44,9 +49,9 @@ public class Config {
             @Override
             public void configure() throws Exception {
                 from(TEST_PRODUCER)
-                        .to("google-pubsub:fhir-experiments-20210712:kms-key-available-05");
+                        .to("google-pubsub:emulator:phoenix-task-request");
 
-                from("google-pubsub:fhir-experiments-20210712:kms-key-available-05-kms")
+                from("google-pubsub:emulator:phoenix-task-response")
                         .to(TEST_CONSUMER);
 
                 LOG.info("Routes added.");
