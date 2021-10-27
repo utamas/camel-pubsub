@@ -1,18 +1,30 @@
 resource "google_pubsub_topic" "phoenix_task_request" {
   name = "phoenix-task-request"
+  depends_on = [module.pubsub]
 }
 
 resource "google_pubsub_subscription" "blah" {
   name  = "phoenix-task-response"
   topic = google_pubsub_topic.phoenix_task_request.id
+
+  depends_on = [google_pubsub_topic.phoenix_task_request]
 }
 
 module "pubsub" {
   source = "git@github.com:patientsknowbest/terraform-modules.git//google-pubsub-emulator/?ref=pubsub-emulator-1.0.0"
 
   external_port = "32085"
+  namespace = kubernetes_namespace.default.metadata[0].name
 
   termination_grace_period_seconds = 0
+
+  depends_on = [kubernetes_namespace.default]
+}
+
+resource "kubernetes_namespace" "default" {
+  metadata {
+    name = "reactive"
+  }
 }
 
 provider "kubernetes" {
@@ -21,7 +33,7 @@ provider "kubernetes" {
 }
 
 provider "google" {
-  pubsub_custom_endpoint = "http://192.168.64.2:${module.pubsub.external_port}/v1/"
+  pubsub_custom_endpoint = "http://localhost:${module.pubsub.external_port}/v1/"
   project                = module.pubsub.project
   access_token           = "dummy_token"
 }

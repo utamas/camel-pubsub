@@ -34,8 +34,13 @@ public class Config {
     private ProducerTemplate producer;
 
     @Bean
-    public PubSubEventConsumer consumer(ObjectMapper json) {
-        return new PubSubEventConsumer(json);
+    public PubSubFluxSource source(ObjectMapper json) {
+        return new PubSubFluxSource(json);
+    }
+
+    @Bean
+    public PubSubIntegrationWrapper consumer(ObjectMapper json, PubSubFluxSource source) {
+        return new PubSubIntegrationWrapper(json, producer, source);
     }
 
     @Bean
