@@ -1,4 +1,4 @@
-package com.pkb.sandbox.pubsub;
+package com.pkb.greeting;
 
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;

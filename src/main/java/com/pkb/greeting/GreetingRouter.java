@@ -1,4 +1,4 @@
-package com.pkb.sandbox.pubsub;
+package com.pkb.greeting;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

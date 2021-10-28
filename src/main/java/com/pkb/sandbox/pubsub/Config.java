@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 
 import static java.lang.invoke.MethodHandles.lookup;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -34,18 +35,13 @@ public class Config {
     private ProducerTemplate producer;
 
     @Bean
-    public PubSubFluxSource source(ObjectMapper json) {
-        return new PubSubFluxSource(json);
+    public PubSubResponseHandler source(ObjectMapper json, ReactiveRedisTemplate<String, String> redis) {
+        return new PubSubResponseHandler(json, redis);
     }
 
     @Bean
-    public PubSubIntegrationWrapper consumer(ObjectMapper json, PubSubFluxSource source) {
-        return new PubSubIntegrationWrapper(json, producer, source);
-    }
-
-    @Bean
-    public PubSubEventProducer producer(ObjectMapper json) {
-        return new PubSubEventProducer(producer, json);
+    public PubSubIntegrationWrapper consumer(ObjectMapper json, ReactiveRedisTemplate<String, String> redis) {
+        return new PubSubIntegrationWrapper(json, producer, redis);
     }
 
     @Bean

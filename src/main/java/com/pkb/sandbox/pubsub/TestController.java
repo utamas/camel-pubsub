@@ -5,6 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 public class TestController {
@@ -15,8 +16,14 @@ public class TestController {
         this.consumer = consumer;
     }
 
-    @GetMapping(value = "/test", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<String> test() {
-        return consumer.kick();
+
+    @GetMapping(value = "/kick", produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<String> kick() {
+        return consumer.kick(false).next();
+    }
+
+    @GetMapping(value = "/kicks", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    Flux<String> kicks() {
+        return consumer.kick(true);
     }
 }

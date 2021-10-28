@@ -1,4 +1,4 @@
-package com.pkb.sandbox.pubsub;
+package com.pkb.greeting;
 
 
 public class Greeting {

@@ -1,4 +1,4 @@
-package com.pkb.sandbox.pubsub;
+package com.pkb;
 
 import com.google.api.core.ApiFutureCallback;
 import com.google.api.gax.core.FixedCredentialsProvider;
@@ -27,7 +27,7 @@ import static java.lang.invoke.MethodHandles.lookup;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class Test {
+public class WorkflowIdentityTest {
     private static final Logger LOG = getLogger(lookup().lookupClass());
 
     public static void main(String[] args) throws IOException, InterruptedException, TimeoutException {

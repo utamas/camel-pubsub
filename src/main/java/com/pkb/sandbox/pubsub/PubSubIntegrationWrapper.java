@@ -2,14 +2,21 @@ package com.pkb.sandbox.pubsub;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.apache.camel.ProducerTemplate;
 import org.slf4j.Logger;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamReadOptions;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static java.lang.invoke.MethodHandles.lookup;
+import static java.time.Duration.ofSeconds;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class PubSubIntegrationWrapper {
@@ -17,42 +24,37 @@ public class PubSubIntegrationWrapper {
 
     private final ObjectMapper json;
     private final ProducerTemplate producer;
-    private final PubSubFluxSource source;
+    private final ReactiveRedisTemplate<String, String> redis;
 
-    public PubSubIntegrationWrapper(ObjectMapper json, ProducerTemplate producer, PubSubFluxSource source) {
+    public PubSubIntegrationWrapper(ObjectMapper json, ProducerTemplate producer, ReactiveRedisTemplate<String, String> redis) {
         this.json = json;
         this.producer = producer;
-        this.source = source;
+        this.redis = redis;
     }
 
-    public Flux<String> kick() {
+    public Flux<String> kick(boolean streamProgress) {
         var requestId = UUID.randomUUID().toString();
 
         return Flux.create(emitter -> {
-            var d = source.events()
-                    .filter(event -> {
-                        LOG.info("Filtering: event id=[{}], looking for id=[{}]", event.getId(), requestId);
-                        return requestId.equals(event.getId());
-                    })
+            //noinspection unchecked
+            var d = redis.<String, String>opsForStream()
+                    .read(StreamReadOptions.empty().block(ofSeconds(10)), StreamOffset.create(requestId, ReadOffset.from("0")))
+                    .map(record -> record.getValue().get("response"))
                     .subscribe(event -> {
-                        LOG.info("We received a response for {}", requestId);
-                        try {
-                            emitter.next(json.writeValueAsString(event));
-                            emitter.complete();
-                            LOG.info("Terminated flux.");
-                        } catch (JsonProcessingException e) {
-                            LOG.error("Ups, something went wrong: ", e);
-                            emitter.error(e);
-                        }
+                        emitter.next(event);
+                        emitter.complete();
+                        redis.delete(requestId).subscribe();
+//                        LOG.info("Terminated response flux and redis stream.");
                     });
 
             try {
 
-                LOG.info("Sending request");
                 producer.sendBody(json.writer().writeValueAsString(buildEvent(requestId)));
-                LOG.info("Request sent");
+//                LOG.info("PubSub Request is sent {}.", requestId);
 
-                emitter.next(requestId);
+                if (streamProgress) {
+                    emitter.next(requestId);
+                }
 
             } catch (JsonProcessingException e) {
                 emitter.error(e);
