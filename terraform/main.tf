@@ -56,7 +56,7 @@ resource "google_pubsub_topic" "phoenix_task_request" {
   depends_on = [module.pubsub]
 }
 
-resource "google_pubsub_subscription" "blah" {
+resource "google_pubsub_subscription" "phoenix_task_response" {
   name  = "phoenix-task-response"
   topic = google_pubsub_topic.phoenix_task_request.id
 

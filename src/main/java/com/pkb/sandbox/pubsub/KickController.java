@@ -8,22 +8,22 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class TestController {
-    private final PubSubIntegrationWrapper consumer;
+public class KickController {
+    private final KickService service;
 
     @Autowired
-    public TestController(PubSubIntegrationWrapper consumer) {
-        this.consumer = consumer;
+    public KickController(KickService consumer) {
+        this.service = consumer;
     }
 
 
     @GetMapping(value = "/kick", produces = MediaType.APPLICATION_JSON_VALUE)
     Mono<String> kick() {
-        return consumer.kick(false).next();
+        return service.kick(false).next();
     }
 
     @GetMapping(value = "/kicks", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> kicks() {
-        return consumer.kick(true);
+        return service.kick(true);
     }
 }

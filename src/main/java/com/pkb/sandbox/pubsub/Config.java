@@ -1,7 +1,6 @@
 package com.pkb.sandbox.pubsub;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -30,18 +29,13 @@ public class Config {
     private static final String TEST_PRODUCER = "direct:testproducer";
 
     @Autowired
-    @EndpointInject(TEST_PRODUCER)
     @Produce(TEST_PRODUCER)
     private ProducerTemplate producer;
 
-    @Bean
-    public PubSubResponseHandler source(ObjectMapper json, ReactiveRedisTemplate<String, String> redis) {
-        return new PubSubResponseHandler(json, redis);
-    }
 
     @Bean
-    public PubSubIntegrationWrapper consumer(ObjectMapper json, ReactiveRedisTemplate<String, String> redis) {
-        return new PubSubIntegrationWrapper(json, producer, redis);
+    public KickService consumer(ObjectMapper json, ReactiveRedisTemplate<String, String> redis) {
+        return new KickService(json, producer, redis);
     }
 
     @Bean

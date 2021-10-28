@@ -10,6 +10,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event implements Serializable {
-    private String id;
+    private String correlationId;
     private String message;
 }
