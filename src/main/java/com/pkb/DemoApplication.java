@@ -1,4 +1,4 @@
-package com.pkb.sandbox.pubsub;
+package com.pkb;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

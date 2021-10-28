@@ -1,3 +1,56 @@
+resource "kubernetes_service" "redis" {
+  metadata {
+    name = "redis"
+    namespace = kubernetes_namespace.default.metadata[0].name
+  }
+  spec {
+    type = "NodePort"
+    selector = kubernetes_deployment.redis.spec[0].selector[0].match_labels
+
+    port {
+      port = 6379
+      target_port = 6379
+      node_port = 32100
+    }
+  }
+}
+
+resource "kubernetes_deployment" "redis" {
+  metadata {
+    name = "redis"
+    namespace = kubernetes_namespace.default.metadata[0].name
+  }
+  spec {
+    selector {
+      match_labels = {
+        app = "redis"
+      }
+    }
+    template {
+      metadata {
+        labels = {
+          app = "redis"
+        }
+      }
+      spec {
+        container {
+          name = "redis"
+          image = "redis@sha256:5d30f5c16e473549ad7c950b0ac3083039719b1c9749519c50e18017dd4bfc54" // redis:6.2.6-bullseye
+
+          env {
+            name = "ALLOW_EMPTY_PASSWORD"
+            value = "yes"
+          }
+
+          port {
+            container_port = 6379
+          }
+        }
+      }
+    }
+  }
+}
+
 resource "google_pubsub_topic" "phoenix_task_request" {
   name = "phoenix-task-request"
   depends_on = [module.pubsub]
