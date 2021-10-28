@@ -14,14 +14,14 @@ import static org.springframework.data.redis.serializer.RedisSerializationContex
 
 @Configuration
 public class CoffeeConfiguration {
-    @Bean
-    ReactiveRedisOperations<String, Coffee> redisOperations(ReactiveRedisConnectionFactory factory) {
-        Jackson2JsonRedisSerializer<Coffee> serializer = new Jackson2JsonRedisSerializer<>(Coffee.class);
-
-        var context = RedisSerializationContext.<String, Coffee>newSerializationContext(new StringRedisSerializer())
-                .value(serializer)
-                .build();
-
-        return new ReactiveRedisTemplate<>(factory, context);
-    }
+//    @Bean
+//    ReactiveRedisTemplate<String, String> redisOperations(ReactiveRedisConnectionFactory factory) {
+////        Jackson2JsonRedisSerializer<Coffee> serializer = new Jackson2JsonRedisSerializer<>(Coffee.class);
+////
+//        var context = RedisSerializationContext.<String, String>newSerializationContext(new StringRedisSerializer())
+////                .value(serializer)
+//                .build();
+//
+//        return new ReactiveRedisTemplate<>(factory, context);
+//    }
 }

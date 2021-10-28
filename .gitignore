@@ -1,5 +1,6 @@
 .idea
 target
+java-pubsub.iml
 
 terraform/.state
 terraform/.terraform
